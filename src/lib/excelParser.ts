@@ -5,7 +5,7 @@ import { ProductData } from '@/types';
 const COLUMN_KEYWORDS = {
     productName: ['产品名称', '品名', '商品名称',
         '货品名称'],
-    orderNumber: ['订单编号', '订单号', '单号'],
+    orderNumber: ['工单号'],
     productCode: ['产品编号', '货号', '商品编号', '款号'],
     quantity: ['数量', '件数', '总数'],
     remarks: ['批次', '备注', '说明', '批号']
@@ -28,7 +28,7 @@ const findKeywordPosition = (worksheet: XLSX.WorkSheet,
             if (cell && cell.v) {
                 const cellValue = cell.v.toString().trim();
                 for (const keyword of keywords) {
-                    if (cellValue.includes(keyword)) {
+                    if (cellValue === keyword) {
                         return { row, col };
                     }
                 }
@@ -121,24 +121,32 @@ export const parseExcelFile = async (file: File):
 
                 // 检查必需的列是否找到
                 if (!productNamePos) {
-                    throw new Error('未找到产品名称列，请检查表格是否 包含：产品名称、品名等关键字');
+                    throw new Error('未找到产品名称列，请检查表格是否包含：产品名称、品名等关键字');
+                }
+                if (!orderNumberPos) {
+                    throw new Error('未找到工单号列，请检查表格是否包含：工单号');
+                }
+                if (!productCodePos) {
+                    throw new Error('未找到货号列，请检查表格是否包含：产品编号、货号、商品编号、款号等关键字');
+                }
+                if (!remarksPos) {
+                    throw new Error('未找到批次列，请检查表格是否包含：批次、备注、说明、批号等关键字');
+                }
+                if (!quantityPos) {
+                    throw new Error('未找到数量列，请检查表格是否包含：数量、件数、总数等关键字');
                 }
 
                 // 提取各列数据
                 const productNames = extractColumnData(worksheet,
                     productNamePos.col, productNamePos.row);
-                const orderNumbers = orderNumberPos ?
-                    extractColumnData(worksheet, orderNumberPos.col,
-                        orderNumberPos.row) : [];
-                const productCodes = productCodePos ?
-                    extractColumnData(worksheet, productCodePos.col,
-                        productCodePos.row) : [];
-                const quantities = quantityPos ?
-                    extractColumnData(worksheet, quantityPos.col,
-                        quantityPos.row) : [];
-                const remarks = remarksPos ?
-                    extractColumnData(worksheet, remarksPos.col,
-                        remarksPos.row) : [];
+                const orderNumbers = extractColumnData(worksheet,
+                    orderNumberPos.col, orderNumberPos.row);
+                const productCodes = extractColumnData(worksheet,
+                    productCodePos.col, productCodePos.row);
+                const quantities = extractColumnData(worksheet,
+                    quantityPos.col, quantityPos.row);
+                const remarks = extractColumnData(worksheet,
+                    remarksPos.col, remarksPos.row);
 
                 // 构建产品数据
                 const products: ProductData[] = [];
