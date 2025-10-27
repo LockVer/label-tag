@@ -122,16 +122,16 @@ export default function LabelsPage() {
           />
         </div>
         <div className="pl-2 break-words">
-          {product.productName} （产品名称）
+          {product.productName}
         </div>
         <div className="px-2 break-words">
-          {product.orderNumber} （订单号）
+          {product.orderNumber}
         </div>
         <div className="px-2 break-words">
-          {product.productCode} （货号）
+          {product.productCode}
         </div>
         <div className="px-2 break-words">
-          {product.remarks} （批次）
+          {product.remarks}
         </div>
         <div className="text-right font-medium pr-20 whitespace-nowrap">
           {product.quantity}

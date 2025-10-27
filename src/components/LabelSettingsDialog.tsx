@@ -27,8 +27,8 @@ export function LabelSettingsDialog({
   onOpenChange,
   selectedProducts,
 }: LabelSettingsDialogProps) {
-  const [spareQuantity, setSpareQuantity] = useState(200);
-  const [fontSize, setFontSize] = useState(10);
+  const [spareQuantity, setSpareQuantity] = useState<number | ''>(0);
+  const [fontSize, setFontSize] = useState<number | ''>(10);
   const [styles, setStyles] = useState({
     chinese: true,
     english: true,
@@ -52,11 +52,12 @@ export function LabelSettingsDialog({
 
   // 计算逻辑
   const calculateLabels = () => {
-    const totalQuantity = selectedProducts.reduce((sum, p) => sum + p.quantity, 0);
     const enabledStyles = Object.values(styles).filter(Boolean).length;
 
-    // 常规标签：按 5000 分包
-    const regularLabels = Math.ceil(totalQuantity / 5000);
+    // 常规标签：每个产品单独按 5000 分包
+    const regularLabels = selectedProducts.reduce((sum, product) => {
+      return sum + Math.ceil(product.quantity / 5000);
+    }, 0);
 
     // 备品标签：每个产品 1 张
     const spareLabels = selectedProducts.length;
@@ -86,8 +87,8 @@ export function LabelSettingsDialog({
 
       // 生成 PDF
       renderer.exportToPDF(selectedProducts, {
-        spareQuantity,
-        fontSize,
+        spareQuantity: spareQuantity === '' ? 0 : spareQuantity,
+        fontSize: fontSize === '' ? 10 : fontSize,
         styles
       });
 
@@ -125,7 +126,10 @@ export function LabelSettingsDialog({
               id="spare-quantity"
               type="number"
               value={spareQuantity}
-              onChange={(e) => setSpareQuantity(Number(e.target.value))}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSpareQuantity(value === '' ? '' : Number(value));
+              }}
               className="w-full"
             />
             <p className="text-xs text-gray-500">
@@ -140,7 +144,10 @@ export function LabelSettingsDialog({
               id="font-size"
               type="number"
               value={fontSize}
-              onChange={(e) => setFontSize(Number(e.target.value))}
+              onChange={(e) => {
+                const value = e.target.value;
+                setFontSize(value === '' ? '' : Number(value));
+              }}
               className="w-full"
             />
           </div>
