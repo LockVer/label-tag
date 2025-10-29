@@ -1,0 +1,31 @@
+# 忽略不需要上传的文件和目录
+node_modules
+.git
+.gitignore
+
+# .next 目录中不需要的文件
+.next/cache
+.next/dev
+.next/trace
+.next/diagnostics
+.next/trace-build
+
+# 源代码和开发文件
+src
+scripts
+
+# 配置文件
+README.md
+.DS_Store
+*.log
+*.md
+.vscode
+.idea
+eslint.config.mjs
+tsconfig.json
+next.config.ts
+postcss.config.mjs
+components.json
+pnpm-lock.yaml
+next-env.d.ts
+bootstrap
