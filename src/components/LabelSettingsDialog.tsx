@@ -27,6 +27,7 @@ export function LabelSettingsDialog({
   onOpenChange,
   selectedProducts,
 }: LabelSettingsDialogProps) {
+  const [generateSpare, setGenerateSpare] = useState(true);
   const [spareQuantity, setSpareQuantity] = useState<number | ''>(0);
   const [fontSize, setFontSize] = useState<number | ''>(10);
   const [styles, setStyles] = useState({
@@ -39,6 +40,7 @@ export function LabelSettingsDialog({
   useEffect(() => {
     if (!open) {
       setTimeout(() => {
+        setGenerateSpare(true);
         setSpareQuantity(0);
         setFontSize(10);
         setStyles({
@@ -59,8 +61,8 @@ export function LabelSettingsDialog({
       return sum + Math.ceil(product.quantity / 5000);
     }, 0);
 
-    // 备品标签：每个产品 1 张
-    const spareLabels = selectedProducts.length;
+    // 备品标签：只有选中生成备品时才计算
+    const spareLabels = generateSpare ? selectedProducts.length : 0;
 
     // 总标签数
     const totalLabels = (regularLabels + spareLabels) * enabledStyles;
@@ -87,6 +89,7 @@ export function LabelSettingsDialog({
 
       // 生成 PDF
       renderer.exportToPDF(selectedProducts, {
+        generateSpare: generateSpare,
         spareQuantity: spareQuantity === '' ? 0 : spareQuantity,
         fontSize: fontSize === '' ? 10 : fontSize,
         styles
@@ -117,25 +120,41 @@ export function LabelSettingsDialog({
             配置标签生成参数，系统暂且自动拆分超过 5000 数量的标签
           </p>
 
-          {/* 备品数量 */}
+          {/* 生成备品标签复选框 */}
           <div className="space-y-2">
-            <Label htmlFor="spare-quantity">
-              备品数量 <span className="text-gray-500">(每个产品款式)</span>
-            </Label>
-            <Input
-              id="spare-quantity"
-              type="number"
-              value={spareQuantity}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSpareQuantity(value === '' ? '' : Number(value));
-              }}
-              className="w-full"
-            />
-            <p className="text-xs text-gray-500">
-              每个产品的备件默认式都会生成一张备品标签
-            </p>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="generate-spare"
+                checked={generateSpare}
+                onCheckedChange={(checked) => setGenerateSpare(!!checked)}
+              />
+              <label htmlFor="generate-spare" className="text-sm font-medium cursor-pointer">
+                生成备品标签
+              </label>
+            </div>
           </div>
+
+          {/* 备品数量 - 只有选中生成备品时才显示 */}
+          {generateSpare && (
+            <div className="space-y-2">
+              <Label htmlFor="spare-quantity">
+                备品数量 <span className="text-gray-500">(每个产品款式)</span>
+              </Label>
+              <Input
+                id="spare-quantity"
+                type="number"
+                value={spareQuantity}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSpareQuantity(value === '' ? '' : Number(value));
+                }}
+                className="w-full"
+              />
+              <p className="text-xs text-gray-500">
+                每个产品的备件默认式都会生成一张备品标签
+              </p>
+            </div>
+          )}
 
           {/* 标签字体大小 */}
           <div className="space-y-2">
