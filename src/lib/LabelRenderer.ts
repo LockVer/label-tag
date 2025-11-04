@@ -9,6 +9,7 @@ interface StyleLabels {
 }
 
 interface LabelConfig {
+  generateSpare: boolean;
   spareQuantity: number;
   fontSize: number;
   styles: StyleLabels;
@@ -88,16 +89,18 @@ class LabelRenderer {
         });
       });
 
-      // 生成备品标签
-      enabledStyles.forEach((style) => {
-        if (!isFirstPage) {
-          pdf.addPage();
-        }
-        isFirstPage = false;
+      // 生成备品标签 - 只有当选择生成备品时才生成
+      if (config.generateSpare) {
+        enabledStyles.forEach((style) => {
+          if (!isFirstPage) {
+            pdf.addPage();
+          }
+          isFirstPage = false;
 
-        const labelData = this.prepareLabelData(product, config.spareQuantity, style, true);
-        this.drawLabelToPDF(pdf, labelData, config.fontSize);
-      });
+          const labelData = this.prepareLabelData(product, config.spareQuantity, style, true);
+          this.drawLabelToPDF(pdf, labelData, config.fontSize);
+        });
+      }
     });
 
     // 生成文件名
