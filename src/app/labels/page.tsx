@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,12 +8,20 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Search } from 'lucide-react';
 import { ProductData } from '@/types';
 import { LabelSettingsDialog } from '@/components/LabelSettingsDialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function LabelsPage() {
   const [products, setProducts] = useState<ProductData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedBatch, setSelectedBatch] = useState<string>('all');
   const router = useRouter();
 
   useEffect(() => {
@@ -35,9 +43,26 @@ export default function LabelsPage() {
     }
   }, [router]);
 
+  // 获取所有唯一的批次
+  const batches = useMemo(() => {
+    const batchSet = new Set<string>();
+    products.forEach(product => {
+      if (product.remarks) {
+        batchSet.add(product.remarks);
+      }
+    });
+    return Array.from(batchSet).sort();
+  }, [products]);
+
   const filteredProducts = products.filter(product => {
     const searchValue = searchTerm.trim().toLowerCase().replace(/\s+/g, '');
 
+    // 批次筛选
+    if (selectedBatch !== 'all' && product.remarks !== selectedBatch) {
+      return false;
+    }
+
+    // 搜索过滤
     // 对于批次字段，提取数字进行严格匹配
     const remarksMatch = () => {
       if (!product.remarks) return false;
@@ -78,6 +103,12 @@ export default function LabelsPage() {
     }
   };
 
+  const handleInvertSelection = () => {
+    const currentFilteredIds = filteredProducts.map(p => p.id!);
+    const newSelected = currentFilteredIds.filter(id => !selectedProducts.includes(id));
+    setSelectedProducts(newSelected);
+  };
+
   return (
     <div className="h-screen bg-white flex flex-col overflow-hidden">
       {/* 标题 - 放大加粗居中 */}
@@ -108,6 +139,43 @@ export default function LabelsPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 border border-gray-300 rounded"
             />
+          </div>
+        </div>
+
+        {/* 批量操作栏 */}
+        <div className="mb-4 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <span className="text-base text-gray-700">批量操作：</span>
+              <Button
+                variant="outline"
+                className="text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 px-3 py-1 h-auto border border-gray-300"
+                onClick={() => handleSelectAll(true)}
+              >
+                全选
+              </Button>
+              <Button
+                variant="outline"
+                className="text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 px-3 py-1 h-auto border border-gray-300"
+                onClick={handleInvertSelection}
+              >
+                反选
+              </Button>
+            </div>
+            {/* 批次筛选下拉框 */}
+            <Select value={selectedBatch} onValueChange={setSelectedBatch}>
+              <SelectTrigger className="w-[180px] border border-gray-300">
+                <SelectValue placeholder="全部批次" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部批次</SelectItem>
+                {batches.map(batch => (
+                  <SelectItem key={batch} value={batch}>
+                    {batch}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 {/* 表格容器 */}
