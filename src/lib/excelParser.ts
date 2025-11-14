@@ -5,7 +5,7 @@ import { ProductData } from '@/types';
 const COLUMN_KEYWORDS = {
     productName: ['产品名称', '品名', '商品名称',
         '货品名称'],
-    orderNumber: ['工单号'],
+    orderNumber: ['订单编号'],
     productCode: ['产品编号', '货号', '商品编号', '款号'],
     quantity: ['数量', '件数', '总数'],
     remarks: ['批次', '备注', '说明', '批号']
@@ -124,7 +124,7 @@ export const parseExcelFile = async (file: File):
                     throw new Error('未找到产品名称列，请检查表格是否包含：产品名称、品名等关键字');
                 }
                 if (!orderNumberPos) {
-                    throw new Error('未找到工单号列，请检查表格是否包含：工单号');
+                    throw new Error('未找到订单编号列，请检查表格是否包含：订单编号');
                 }
                 if (!productCodePos) {
                     throw new Error('未找到货号列，请检查表格是否包含：产品编号、货号、商品编号、款号等关键字');
