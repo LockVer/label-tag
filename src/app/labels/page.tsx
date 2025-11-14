@@ -35,11 +35,32 @@ export default function LabelsPage() {
     }
   }, [router]);
 
-  const filteredProducts = products.filter(product =>
-    product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.productCode.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products.filter(product => {
+    const searchValue = searchTerm.trim().toLowerCase().replace(/\s+/g, '');
+
+    // 对于批次字段，提取数字进行严格匹配
+    const remarksMatch = () => {
+      if (!product.remarks) return false;
+      const remarksNoSpace = product.remarks.toLowerCase().replace(/\s+/g, '');
+
+      // 如果搜索词是纯数字，则从批次中提取数字进行完整匹配
+      if (/^\d+$/.test(searchValue)) {
+        const remarksNumbers = product.remarks.match(/\d+/g);
+        return remarksNumbers?.some(num => num === searchValue) || false;
+      }
+
+      // 否则进行普通的模糊匹配
+      return remarksNoSpace.includes(searchValue);
+    };
+
+    return (
+      product.productName?.toLowerCase().replace(/\s+/g, '').includes(searchValue) ||
+      product.orderNumber?.toLowerCase().replace(/\s+/g, '').includes(searchValue) ||
+      product.productCode?.toLowerCase().replace(/\s+/g, '').includes(searchValue) ||
+      remarksMatch() ||
+      product.quantity?.toString().replace(/\s+/g, '').includes(searchValue)
+    );
+  });
 
   const handleSelectProduct = (productId: string, checked: boolean) => {
     if (checked) {
@@ -82,7 +103,7 @@ export default function LabelsPage() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
-              placeholder="搜索产品名称、订单号、货号、批次"
+              placeholder="搜索产品名称、订单号、货号、批次、数量"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 border border-gray-300 rounded"
