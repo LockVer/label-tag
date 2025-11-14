@@ -117,7 +117,7 @@ export default function LabelsPage() {
       </div>
 
       {/* 主体内容 */}
-      <div className="px-8 pb-8 max-w-[60%] mx-auto flex-1 flex flex-col overflow-hidden">
+      <div className="px-8 pb-8 w-[60%] mx-auto flex-1 flex flex-col overflow-hidden">
         {/* 顶部区域 */}
         <div className="flex items-center justify-between mb-6 flex-shrink-0">
           <h2 className="text-3xl font-medium text-gray-900">产品列表</h2>
@@ -179,10 +179,10 @@ export default function LabelsPage() {
           </div>
         </div>
 {/* 表格容器 */}
-<div className="border border-gray-300 rounded-lg overflow-x-auto flex-1 flex flex-col overflow-hidden">
+<div className="border border-gray-300 rounded-lg flex-1 flex flex-col overflow-hidden">
   {/* 表头 - 固定不滚动 */}
-  <div className="bg-white border-b border-gray-300 min-w-[900px] flex-shrink-0">
-    <div className="grid grid-cols-[auto_3fr_2fr_1.5fr_1.5fr_1.5fr] gap-2 pl-6 pr-[calc(1.5rem+17px)] py-3 text-base font-medium text-gray-500">
+  <div className="bg-white border-b border-gray-300 flex-shrink-0 overflow-y-scroll">
+    <div className="grid grid-cols-[auto_3fr_2fr_1.5fr_1.5fr_1.5fr] gap-2 pl-6 pr-6 py-3 text-base font-medium text-gray-500">
       <div className="flex items-center">
         <Checkbox
           checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
@@ -193,12 +193,12 @@ export default function LabelsPage() {
       <div className="px-2 whitespace-nowrap">订单号</div>
       <div className="px-2 whitespace-nowrap">货号</div>
       <div className="px-2 whitespace-nowrap">批次</div>
-      <div className="text-right pr-20 whitespace-nowrap">数量</div>
+      <div className="text-right pr-6 whitespace-nowrap">数量</div>
     </div>
   </div>
 
   {/* 表体 */}
-  <div className="min-w-[900px] overflow-y-auto flex-1">
+  <div className="overflow-y-scroll flex-1">
     {filteredProducts.map((product, index) => (
       <div
         key={product.id || index}
@@ -222,7 +222,7 @@ export default function LabelsPage() {
         <div className="px-2 break-words">
           {product.remarks}
         </div>
-        <div className="text-right font-medium pr-20 whitespace-nowrap">
+        <div className="text-right font-medium pr-6 whitespace-nowrap">
           {product.quantity}
         </div>
       </div>
