@@ -5,23 +5,21 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { ProductData } from '@/types';
 import { LabelSettingsDialog } from '@/components/LabelSettingsDialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 export default function LabelsPage() {
   const [products, setProducts] = useState<ProductData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedBatch, setSelectedBatch] = useState<string>('all');
+  const [selectedBatches, setSelectedBatches] = useState<string[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -57,8 +55,8 @@ export default function LabelsPage() {
   const filteredProducts = products.filter(product => {
     const searchValue = searchTerm.trim().toLowerCase().replace(/\s+/g, '');
 
-    // 批次筛选
-    if (selectedBatch !== 'all' && product.remarks !== selectedBatch) {
+    // 批次筛选 - 支持多选
+    if (selectedBatches.length > 0 && product.remarks && !selectedBatches.includes(product.remarks)) {
       return false;
     }
 
@@ -107,6 +105,24 @@ export default function LabelsPage() {
     const currentFilteredIds = filteredProducts.map(p => p.id!);
     const newSelected = currentFilteredIds.filter(id => !selectedProducts.includes(id));
     setSelectedProducts(newSelected);
+  };
+
+  const handleBatchToggle = (batch: string) => {
+    setSelectedBatches(prev => {
+      if (prev.includes(batch)) {
+        return prev.filter(b => b !== batch);
+      } else {
+        return [...prev, batch];
+      }
+    });
+  };
+
+  const handleSelectAllBatches = () => {
+    setSelectedBatches(batches);
+  };
+
+  const handleClearAllBatches = () => {
+    setSelectedBatches([]);
   };
 
   return (
@@ -162,20 +178,63 @@ export default function LabelsPage() {
                 反选
               </Button>
             </div>
-            {/* 批次筛选下拉框 */}
-            <Select value={selectedBatch} onValueChange={setSelectedBatch}>
-              <SelectTrigger className="w-[180px] border border-gray-300">
-                <SelectValue placeholder="全部批次" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部批次</SelectItem>
-                {batches.map(batch => (
-                  <SelectItem key={batch} value={batch}>
-                    {batch}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* 批次筛选多选下拉框 */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-[200px] justify-between border border-gray-300"
+                >
+                  <span className="truncate">
+                    {selectedBatches.length === 0
+                      ? '全部批次'
+                      : selectedBatches.length === batches.length
+                      ? '全部批次'
+                      : `已选 ${selectedBatches.length} 个批次`}
+                  </span>
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0" align="end">
+                <div className="max-h-[300px] overflow-y-auto">
+                  {/* 全选/清空按钮 */}
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 text-xs text-blue-600 hover:text-blue-700"
+                      onClick={handleSelectAllBatches}
+                    >
+                      全选
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 text-xs text-gray-600 hover:text-gray-700"
+                      onClick={handleClearAllBatches}
+                    >
+                      清空
+                    </Button>
+                  </div>
+                  {/* 批次列表 */}
+                  <div className="p-2">
+                    {batches.map(batch => (
+                      <div
+                        key={batch}
+                        className="flex items-center space-x-2 px-2 py-2 hover:bg-gray-100 rounded cursor-pointer"
+                        onClick={() => handleBatchToggle(batch)}
+                      >
+                        <Checkbox
+                          checked={selectedBatches.includes(batch)}
+                          onCheckedChange={() => handleBatchToggle(batch)}
+                        />
+                        <span className="text-sm">{batch}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 {/* 表格容器 */}
